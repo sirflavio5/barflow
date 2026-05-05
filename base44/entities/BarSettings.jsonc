@@ -1,0 +1,21 @@
+{
+  "name": "BarSettings",
+  "type": "object",
+  "properties": {
+    "bar_name": {
+      "type": "string",
+      "default": "Bar Nobre"
+    },
+    "primary_color": {
+      "type": "string",
+      "default": "#F59E0B"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "tagline": {
+      "type": "string"
+    }
+  },
+  "required": []
+}

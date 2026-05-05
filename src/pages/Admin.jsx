@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, RefreshCw, LayoutGrid, ClipboardList, QrCode, Trash2, Pencil, Wine, BarChart2 } from "lucide-react";
+import { Plus, RefreshCw, LayoutGrid, ClipboardList, QrCode, Trash2, Pencil, Wine, BarChart2, Settings } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import OrderCard from "@/components/admin/OrderCard";
 import ProductForm from "@/components/admin/ProductForm";
 import SalesDashboard from "@/components/admin/SalesDashboard";
+import SettingsPanel from "@/components/admin/SettingsPanel";
+import { useBarSettings } from "@/lib/BarSettingsContext";
 
 const tabs = [
   { id: "orders", label: "Pedidos", icon: ClipboardList },
   { id: "menu", label: "Menu", icon: LayoutGrid },
   { id: "sales", label: "Vendas", icon: BarChart2 },
   { id: "qr", label: "QR Codes", icon: QrCode },
+  { id: "settings", label: "Config.", icon: Settings },
 ];
 
 const statusOrder = ["pendente", "confirmado", "em_preparacao", "pronto", "pago"];
@@ -22,6 +25,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [editProduct, setEditProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
+  const { settings } = useBarSettings();
 
   const loadOrders = useCallback(async () => {
     const data = await base44.entities.Order.list("-created_date", 500);
@@ -61,8 +65,12 @@ export default function Admin() {
       {/* Header */}
       <div className="bg-card border-b border-border px-5 pt-10 pb-4">
         <div className="flex items-center gap-2 mb-1">
-          <Wine className="w-5 h-5 text-primary" />
-          <span className="text-primary text-sm font-medium tracking-widest uppercase">Bar Nobre</span>
+          {settings.logo_url ? (
+            <img src={settings.logo_url} alt="Logo" className="w-5 h-5 object-contain rounded" />
+          ) : (
+            <Wine className="w-5 h-5 text-primary" />
+          )}
+          <span className="text-primary text-sm font-medium tracking-widest uppercase">{settings.bar_name || "Bar Nobre"}</span>
         </div>
         <h1 className="font-playfair font-bold text-2xl">Painel de Gestão</h1>
       </div>
@@ -189,6 +197,9 @@ export default function Admin() {
         {tab === "sales" && (
           <SalesDashboard orders={orders} />
         )}
+
+        {/* SETTINGS TAB */}
+        {tab === "settings" && <SettingsPanel />}
 
         {/* QR TAB */}
         {tab === "qr" && (

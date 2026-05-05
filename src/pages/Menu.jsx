@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ShoppingBag, Wine } from "lucide-react";
+import { Wine } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import CategoryTabs from "@/components/menu/CategoryTabs";
 import ProductCard from "@/components/menu/ProductCard";
 import CartDrawer from "@/components/menu/CartDrawer";
+import { useBarSettings } from "@/lib/BarSettingsContext";
 
 export default function Menu() {
   const [products, setProducts] = useState([]);
@@ -16,6 +17,7 @@ export default function Menu() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const tableNumber = urlParams.get("mesa") || "1";
+  const { settings } = useBarSettings();
 
   useEffect(() => {
     base44.entities.Product.filter({ available: true }).then((data) => {
@@ -75,10 +77,17 @@ export default function Menu() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent" />
         <div className="relative px-5 pt-12 pb-6">
           <div className="flex items-center gap-2 mb-1">
-            <Wine className="w-5 h-5 text-primary" />
-            <span className="text-primary text-sm font-medium tracking-widest uppercase">Bar Nobre</span>
+            {settings.logo_url ? (
+              <img src={settings.logo_url} alt="Logo" className="w-6 h-6 object-contain rounded" />
+            ) : (
+              <Wine className="w-5 h-5 text-primary" />
+            )}
+            <span className="text-primary text-sm font-medium tracking-widest uppercase">
+              {settings.bar_name || "Bar Nobre"}
+            </span>
           </div>
           <h1 className="font-playfair font-bold text-4xl text-foreground">Menu</h1>
+          {settings.tagline && <p className="text-muted-foreground text-xs mt-0.5">{settings.tagline}</p>}
           <p className="text-muted-foreground text-sm mt-1">Mesa {tableNumber}</p>
         </div>
       </div>

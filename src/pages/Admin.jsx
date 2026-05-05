@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, RefreshCw, LayoutGrid, ClipboardList, QrCode, Trash2, Pencil, Wine } from "lucide-react";
+import { Plus, RefreshCw, LayoutGrid, ClipboardList, QrCode, Trash2, Pencil, Wine, BarChart2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import OrderCard from "@/components/admin/OrderCard";
 import ProductForm from "@/components/admin/ProductForm";
+import SalesDashboard from "@/components/admin/SalesDashboard";
 
 const tabs = [
   { id: "orders", label: "Pedidos", icon: ClipboardList },
   { id: "menu", label: "Menu", icon: LayoutGrid },
+  { id: "sales", label: "Vendas", icon: BarChart2 },
   { id: "qr", label: "QR Codes", icon: QrCode },
 ];
 
@@ -22,7 +24,7 @@ export default function Admin() {
   const [showProductForm, setShowProductForm] = useState(false);
 
   const loadOrders = useCallback(async () => {
-    const data = await base44.entities.Order.list("-created_date", 50);
+    const data = await base44.entities.Order.list("-created_date", 500);
     setOrders(data);
     setLoading(false);
   }, []);
@@ -44,6 +46,11 @@ export default function Admin() {
 
   const deleteProduct = async (id) => {
     await base44.entities.Product.delete(id);
+    loadProducts();
+  };
+
+  const toggleAvailability = async (product) => {
+    await base44.entities.Product.update(product.id, { available: !product.available });
     loadProducts();
   };
 
@@ -148,7 +155,18 @@ export default function Admin() {
                     <p className="text-muted-foreground text-xs">{p.category}</p>
                     <p className="text-primary font-semibold text-sm">€{p.price?.toFixed(2)}</p>
                   </div>
-                  <div className={`w-2 h-2 rounded-full ${p.available ? "bg-green-400" : "bg-red-400"}`} />
+                  <button
+                    onClick={() => toggleAvailability(p)}
+                    title={p.available ? "Clica para desativar" : "Clica para ativar"}
+                    className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      p.available
+                        ? "bg-green-500/15 text-green-400 hover:bg-red-500/15 hover:text-red-400"
+                        : "bg-red-500/15 text-red-400 hover:bg-green-500/15 hover:text-green-400"
+                    }`}
+                  >
+                    <div className={`w-1.5 h-1.5 rounded-full ${p.available ? "bg-green-400" : "bg-red-400"}`} />
+                    {p.available ? "Ativo" : "Inativo"}
+                  </button>
                   <button
                     onClick={() => { setEditProduct(p); setShowProductForm(true); }}
                     className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center hover:bg-secondary/80"
@@ -165,6 +183,11 @@ export default function Admin() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* SALES TAB */}
+        {tab === "sales" && (
+          <SalesDashboard orders={orders} />
         )}
 
         {/* QR TAB */}

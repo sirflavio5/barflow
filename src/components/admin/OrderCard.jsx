@@ -28,6 +28,21 @@ export default function OrderCard({ order, onUpdate }) {
   const handleAdvance = async () => {
     const next = nextStatus[order.status];
     if (!next) return;
+
+    // When confirming an order, deduct stock from products
+    if (order.status === "pendente" && next === "confirmado") {
+      const products = await base44.entities.Product.list();
+      for (const item of (order.items || [])) {
+        const product = products.find((p) => p.id === item.product_id);
+        if (product && product.stock_enabled && product.stock > 0) {
+          const newStock = Math.max(0, product.stock - item.quantity);
+          const updates = { stock: newStock };
+          if (newStock === 0) updates.available = false;
+          await base44.entities.Product.update(product.id, updates);
+        }
+      }
+    }
+
     await base44.entities.Order.update(order.id, { status: next });
     onUpdate();
   };

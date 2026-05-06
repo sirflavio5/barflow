@@ -7,7 +7,7 @@ const categories = ["bebidas", "cocktails", "comida", "sobremesas"];
 export default function ProductForm({ product, onClose, onSaved }) {
   const [form, setForm] = useState(product || {
     name: "", description: "", price: "", category: "bebidas",
-    image_url: "", available: true
+    image_url: "", available: true, stock_enabled: false, stock: 0
   });
   const [loading, setLoading] = useState(false);
 
@@ -76,6 +76,29 @@ export default function ProductForm({ product, onClose, onSaved }) {
           </div>
           <span className="text-sm text-foreground">Disponível</span>
         </label>
+
+        <label className="flex items-center gap-3 cursor-pointer">
+          <div
+            onClick={() => set("stock_enabled", !form.stock_enabled)}
+            className={`w-10 h-6 rounded-full transition-colors relative ${form.stock_enabled ? "bg-primary" : "bg-secondary"}`}
+          >
+            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${form.stock_enabled ? "left-5" : "left-1"}`} />
+          </div>
+          <span className="text-sm text-foreground">Controlo de stock</span>
+        </label>
+
+        {form.stock_enabled && (
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Quantidade em stock</label>
+            <input
+              type="number"
+              value={form.stock}
+              onChange={(e) => set("stock", parseInt(e.target.value) || 0)}
+              min="0"
+              className="w-full bg-secondary border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+        )}
 
         <button
           onClick={handleSave}

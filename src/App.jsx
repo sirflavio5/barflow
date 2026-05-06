@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 // Add page imports here
 import Menu from "./pages/Menu";
 import Admin from "./pages/Admin";
+import Staff from "./pages/Staff";
 import { BarSettingsProvider } from "@/lib/BarSettingsContext";
 
 const AuthenticatedApp = () => {
@@ -39,6 +40,7 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Menu />} />
       <Route path="/menu" element={<Menu />} />
       <Route path="/admin" element={<Admin />} />
+      <Route path="/staff" element={<Staff />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

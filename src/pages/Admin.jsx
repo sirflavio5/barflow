@@ -6,6 +6,7 @@ import OrderCard from "@/components/admin/OrderCard";
 import ProductForm from "@/components/admin/ProductForm";
 import SalesDashboard from "@/components/admin/SalesDashboard";
 import SettingsPanel from "@/components/admin/SettingsPanel";
+import QRCodesTab from "@/components/admin/QRCodesTab";
 import { useBarSettings } from "@/lib/BarSettingsContext";
 
 const tabs = [
@@ -202,32 +203,7 @@ export default function Admin() {
         {tab === "settings" && <SettingsPanel />}
 
         {/* QR TAB */}
-        {tab === "qr" && (
-          <div className="space-y-4">
-            <h2 className="font-semibold text-lg">Links por Mesa</h2>
-            <p className="text-muted-foreground text-sm">Partilha estes links ou gera QR codes com qualquer gerador online (ex: qr-code-generator.com).</p>
-            <div className="space-y-3">
-              {[...Array(10)].map((_, i) => {
-                const mesa = i + 1;
-                const url = `${baseUrl}?mesa=${mesa}`;
-                return (
-                  <div key={mesa} className="bg-card border border-border/50 rounded-2xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="font-medium">Mesa {mesa}</p>
-                      <button
-                        onClick={() => navigator.clipboard.writeText(url)}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        Copiar link
-                      </button>
-                    </div>
-                    <p className="text-muted-foreground text-xs break-all">{url}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {tab === "qr" && <QRCodesTab baseUrl={baseUrl} />}
       </div>
 
       <AnimatePresence>

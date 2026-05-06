@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, RefreshCw, LayoutGrid, ClipboardList, QrCode, Trash2, Pencil, Wine, BarChart2, Settings } from "lucide-react";
+import { Plus, RefreshCw, LayoutGrid, ClipboardList, QrCode, Trash2, Pencil, Wine, BarChart2, Settings, Wifi } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import OrderCard from "@/components/admin/OrderCard";
 import ProductForm from "@/components/admin/ProductForm";
@@ -26,11 +26,14 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [editProduct, setEditProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
+  const [newOrderAlert, setNewOrderAlert] = useState(false);
   const { settings } = useBarSettings();
+  const ordersRef = useRef([]);
 
   const loadOrders = useCallback(async () => {
     const data = await base44.entities.Order.list("-created_date", 500);
     setOrders(data);
+    ordersRef.current = data;
     setLoading(false);
   }, []);
 
@@ -42,8 +45,21 @@ export default function Admin() {
   useEffect(() => {
     loadOrders();
     loadProducts();
-    const interval = setInterval(loadOrders, 15000);
-    return () => clearInterval(interval);
+
+    // Real-time subscription via WebSocket
+    const unsubscribe = base44.entities.Order.subscribe((event) => {
+      if (event.type === "create") {
+        setOrders((prev) => [event.data, ...prev]);
+        setNewOrderAlert(true);
+        setTimeout(() => setNewOrderAlert(false), 4000);
+      } else if (event.type === "update") {
+        setOrders((prev) => prev.map((o) => o.id === event.id ? event.data : o));
+      } else if (event.type === "delete") {
+        setOrders((prev) => prev.filter((o) => o.id !== event.id));
+      }
+    });
+
+    return () => unsubscribe();
   }, [loadOrders, loadProducts]);
 
   const activeOrders = orders.filter((o) => o.status !== "pago");
@@ -103,10 +119,30 @@ export default function Admin() {
               <h2 className="font-semibold text-lg">
                 Pedidos ativos <span className="text-primary">({activeOrders.length})</span>
               </h2>
-              <button onClick={loadOrders} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80">
-                <RefreshCw className="w-4 h-4 text-muted-foreground" />
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 text-xs text-green-400 font-medium">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+                  </span>
+                  Em direto
+                </div>
+                <button onClick={loadOrders} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-secondary/80">
+                  <RefreshCw className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
             </div>
+
+            {newOrderAlert && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="bg-primary/20 border border-primary/40 text-primary rounded-xl px-4 py-3 text-sm font-medium flex items-center gap-2"
+              >
+                <span className="text-lg">🔔</span> Novo pedido recebido!
+              </motion.div>
+            )}
 
             {loading ? (
               <div className="space-y-3">

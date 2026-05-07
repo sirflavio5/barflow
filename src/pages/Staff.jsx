@@ -1,15 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
-import { ClipboardList, Wine } from "lucide-react";
+import { ClipboardList, Wine, BellRing, BellOff } from "lucide-react";
 import OrderCard from "@/components/admin/OrderCard";
 import { useBarSettings } from "@/lib/BarSettingsContext";
+import { useOrderNotification } from "@/hooks/useOrderNotification";
 
 export default function Staff() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newOrderAlert, setNewOrderAlert] = useState(false);
+  const [newOrderCount, setNewOrderCount] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const { settings } = useBarSettings();
+  const { playSound } = useOrderNotification();
 
   const loadOrders = useCallback(async () => {
     const data = await base44.entities.Order.list("-created_date", 500);
@@ -24,7 +28,9 @@ export default function Staff() {
       if (event.type === "create") {
         setOrders((prev) => [event.data, ...prev]);
         setNewOrderAlert(true);
-        setTimeout(() => setNewOrderAlert(false), 4000);
+        setNewOrderCount((c) => c + 1);
+        if (soundEnabled) playSound();
+        setTimeout(() => setNewOrderAlert(false), 5000);
       } else if (event.type === "update") {
         setOrders((prev) => prev.map((o) => o.id === event.id ? event.data : o));
       } else if (event.type === "delete") {
@@ -51,13 +57,37 @@ export default function Staff() {
           <span className="text-primary text-sm font-medium tracking-widest uppercase">{settings.bar_name || "Bar Nobre"}</span>
         </div>
         <div className="flex items-center justify-between">
-          <h1 className="font-playfair font-bold text-2xl">Dashboard Staff</h1>
-          <div className="flex items-center gap-1.5 text-xs text-green-400 font-medium">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
-            </span>
-            Em direto
+          <div className="flex items-center gap-3">
+            <h1 className="font-playfair font-bold text-2xl">Dashboard Staff</h1>
+            {newOrderCount > 0 && (
+              <span
+                onClick={() => setNewOrderCount(0)}
+                className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full cursor-pointer hover:bg-primary/80 transition-colors"
+                title="Clica para limpar"
+              >
+                {newOrderCount} novo{newOrderCount > 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSoundEnabled((v) => !v)}
+              title={soundEnabled ? "Desativar som" : "Ativar som"}
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                soundEnabled
+                  ? "bg-primary/20 text-primary hover:bg-primary/30"
+                  : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+              }`}
+            >
+              {soundEnabled ? <BellRing className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+            </button>
+            <div className="flex items-center gap-1.5 text-xs text-green-400 font-medium">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+              </span>
+              Em direto
+            </div>
           </div>
         </div>
       </div>
@@ -66,12 +96,13 @@ export default function Staff() {
         <AnimatePresence>
           {newOrderAlert && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="bg-primary/20 border border-primary/40 text-primary rounded-xl px-4 py-3 text-sm font-medium flex items-center gap-2"
+              initial={{ opacity: 0, y: -10, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              className="bg-primary/20 border border-primary/50 text-primary rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2 shadow-lg shadow-primary/10"
             >
-              <span className="text-lg">🔔</span> Novo pedido recebido!
+              <BellRing className="w-4 h-4 animate-bounce" />
+              Novo pedido recebido!
             </motion.div>
           )}
         </AnimatePresence>

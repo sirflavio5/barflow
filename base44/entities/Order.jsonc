@@ -31,6 +31,10 @@
     "total_amount": {
       "type": "number"
     },
+    "tip_amount": {
+      "type": "number",
+      "default": 0
+    },
     "status": {
       "type": "string",
       "enum": [

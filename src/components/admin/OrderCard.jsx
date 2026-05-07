@@ -82,7 +82,14 @@ export default function OrderCard({ order, onUpdate }) {
       )}
 
       <div className="flex items-center justify-between pt-1">
-        <span className="font-semibold text-primary">€{order.total_amount?.toFixed(2)}</span>
+        <div>
+          {order.tip_amount > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Subtotal €{(order.total_amount - order.tip_amount).toFixed(2)} + gorjeta €{order.tip_amount.toFixed(2)}
+            </p>
+          )}
+          <span className="font-semibold text-primary">€{order.total_amount?.toFixed(2)}</span>
+        </div>
         {nextStatus[order.status] && (
           <button
             onClick={handleAdvance}
@@ -92,6 +99,7 @@ export default function OrderCard({ order, onUpdate }) {
           </button>
         )}
       </div>
+
     </motion.div>
   );
 }

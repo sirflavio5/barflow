@@ -10,6 +10,7 @@ import Menu from "./pages/Menu";
 import Admin from "./pages/Admin";
 import Staff from "./pages/Staff";
 import { BarSettingsProvider } from "@/lib/BarSettingsContext";
+import RequireAuth from "@/components/RequireAuth";
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -39,8 +40,8 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<Menu />} />
       <Route path="/menu" element={<Menu />} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/staff" element={<Staff />} />
+      <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
+      <Route path="/staff" element={<RequireAuth><Staff /></RequireAuth>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

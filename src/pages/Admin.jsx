@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, RefreshCw, LayoutGrid, ClipboardList, QrCode, Trash2, Pencil, Wine, BarChart2, Settings, Wifi, PackageOpen } from "lucide-react";
+import { Plus, RefreshCw, LayoutGrid, ClipboardList, QrCode, Trash2, Pencil, Wine, BarChart2, Settings, Wifi, PackageOpen, LineChart } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import OrderCard from "@/components/admin/OrderCard";
 import ProductForm from "@/components/admin/ProductForm";
@@ -8,12 +8,14 @@ import SalesDashboard from "@/components/admin/SalesDashboard";
 import SettingsPanel from "@/components/admin/SettingsPanel";
 import QRCodesTab from "@/components/admin/QRCodesTab";
 import StockPanel from "@/components/admin/StockPanel";
+import AnalyticsPanel from "@/components/admin/AnalyticsPanel";
 import { useBarSettings } from "@/lib/BarSettingsContext";
 
 const tabs = [
   { id: "orders", label: "Pedidos", icon: ClipboardList },
   { id: "menu", label: "Menu", icon: LayoutGrid },
   { id: "stock", label: "Stock", icon: PackageOpen },
+  { id: "analytics", label: "Analytics", icon: LineChart },
   { id: "sales", label: "Vendas", icon: BarChart2 },
   { id: "qr", label: "QR", icon: QrCode },
   { id: "settings", label: "Config.", icon: Settings },
@@ -240,6 +242,17 @@ export default function Admin() {
               <p className="text-muted-foreground text-sm mt-1">Produtos com stock a zero ficam automaticamente indisponíveis.</p>
             </div>
             <StockPanel />
+          </div>
+        )}
+
+        {/* ANALYTICS TAB */}
+        {tab === "analytics" && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-semibold text-lg">Analytics</h2>
+              <p className="text-muted-foreground text-sm mt-1">Dados baseados nos pedidos pagos.</p>
+            </div>
+            <AnalyticsPanel orders={orders} />
           </div>
         )}
 

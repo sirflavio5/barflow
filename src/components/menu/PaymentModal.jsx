@@ -170,6 +170,17 @@ export default function PaymentModal({ items, total, tableNumber, onClose, onOrd
               </div>
             </div>
 
+            {/* Observações */}
+            <div className="mb-5">
+              <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Observações (opcional)</label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Ex: sem gelo, alergia a frutos secos..."
+                className="w-full bg-secondary border border-border rounded-xl p-3 text-sm text-foreground placeholder:text-muted-foreground resize-none h-20 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+
             <button
               onClick={() => setStep("payment")}
               className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-semibold text-base hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
@@ -210,13 +221,6 @@ export default function PaymentModal({ items, total, tableNumber, onClose, onOrd
                 </button>
               ))}
             </div>
-
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Observações (alergias, preferências...)"
-              className="w-full bg-secondary border border-border rounded-xl p-3 text-sm text-foreground placeholder:text-muted-foreground resize-none h-20 mb-5 focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
 
             <div className="bg-secondary/50 rounded-2xl p-4 mb-4 space-y-1.5 text-sm">
               <div className="flex justify-between text-muted-foreground">

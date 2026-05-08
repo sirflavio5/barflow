@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, MessageSquare } from "lucide-react";
 
 const statusColors = {
   pendente: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
@@ -91,8 +91,9 @@ export default function OrderCard({ order, onUpdate }) {
 
       {/* Notes */}
       {order.notes && (
-        <div className="mx-4 mb-3 bg-secondary/60 rounded-xl px-3 py-2 text-xs text-muted-foreground italic">
-          "{order.notes}"
+        <div className="mx-4 mb-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-3 py-2 flex items-start gap-2">
+          <MessageSquare className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-yellow-300 font-medium">{order.notes}</p>
         </div>
       )}
 

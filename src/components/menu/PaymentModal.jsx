@@ -2,8 +2,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, CreditCard, Smartphone, Hash, Banknote, CheckCircle2, Heart } from "lucide-react";
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useBarSettings } from "@/lib/BarSettingsContext";
 
-const methods = [
+const ALL_METHODS = [
   { id: "mbway", label: "MB WAY", icon: Smartphone },
   { id: "multibanco", label: "Multibanco", icon: Hash },
   { id: "cartao", label: "Cartão", icon: CreditCard },
@@ -13,6 +14,10 @@ const methods = [
 const TIP_PERCENTS = [0, 5, 10, 15];
 
 export default function PaymentModal({ items, total, tableNumber, onClose, onOrderPlaced }) {
+  const { settings } = useBarSettings();
+  const methods = ALL_METHODS.filter((m) =>
+    !settings.payment_methods || settings.payment_methods.includes(m.id)
+  );
   const [step, setStep] = useState("tip"); // "tip" | "payment"
   const [tipType, setTipType] = useState("percent"); // "percent" | "fixed"
   const [tipPercent, setTipPercent] = useState(0);

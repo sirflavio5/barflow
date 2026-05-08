@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { ChevronRight } from "lucide-react";
 
 const statusColors = {
   pendente: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
@@ -12,7 +13,7 @@ const statusColors = {
 const statusLabel = {
   pendente: "Pendente",
   confirmado: "Confirmado",
-  em_preparacao: "Em preparação",
+  em_preparacao: "Em prep.",
   pronto: "Pronto",
   pago: "Pago",
 };
@@ -24,12 +25,18 @@ const nextStatus = {
   pronto: "pago",
 };
 
+const nextLabel = {
+  pendente: "Confirmar",
+  confirmado: "Preparar",
+  em_preparacao: "Pronto",
+  pronto: "Pago",
+};
+
 export default function OrderCard({ order, onUpdate }) {
   const handleAdvance = async () => {
     const next = nextStatus[order.status];
     if (!next) return;
 
-    // When confirming an order, deduct stock from products
     if (order.status === "pendente" && next === "confirmado") {
       const products = await base44.entities.Product.list();
       for (const item of (order.items || [])) {
@@ -47,59 +54,73 @@ export default function OrderCard({ order, onUpdate }) {
     onUpdate();
   };
 
+  const subtotal = order.tip_amount > 0 ? order.total_amount - order.tip_amount : order.total_amount;
+
   return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card border border-border/50 rounded-2xl p-4 space-y-3"
+      className="bg-card border border-border/50 rounded-2xl overflow-hidden"
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="font-playfair font-semibold text-lg">Mesa {order.table_number}</p>
-          <p className="text-muted-foreground text-xs">
-            {new Date(order.created_date).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })}
-          </p>
+      {/* Card header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
+        <div className="flex items-center gap-2">
+          <p className="font-playfair font-bold text-base">Mesa {order.table_number}</p>
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${statusColors[order.status]}`}>
+            {statusLabel[order.status]}
+          </span>
         </div>
-        <span className={`text-xs font-medium px-2 py-1 rounded-full border ${statusColors[order.status]}`}>
-          {statusLabel[order.status]}
-        </span>
+        <p className="text-muted-foreground text-xs">
+          {new Date(order.created_date).toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })}
+        </p>
       </div>
 
-      <div className="space-y-1">
+      {/* Items */}
+      <div className="px-4 py-3 space-y-1.5">
         {order.items?.map((item, i) => (
           <div key={i} className="flex justify-between text-sm">
-            <span className="text-foreground">{item.quantity}× {item.product_name}</span>
-            <span className="text-muted-foreground">€{item.total?.toFixed(2)}</span>
+            <span className="text-foreground">
+              <span className="text-primary font-semibold">{item.quantity}×</span>{" "}
+              {item.product_name}
+            </span>
+            <span className="text-muted-foreground font-medium">€{item.total?.toFixed(2)}</span>
           </div>
         ))}
       </div>
 
+      {/* Notes */}
       {order.notes && (
-        <p className="text-xs text-muted-foreground bg-secondary rounded-lg px-3 py-2 italic">
+        <div className="mx-4 mb-3 bg-secondary/60 rounded-xl px-3 py-2 text-xs text-muted-foreground italic">
           "{order.notes}"
-        </p>
+        </div>
       )}
 
-      <div className="flex items-center justify-between pt-1">
+      {/* Footer: total + action */}
+      <div className="flex items-center justify-between px-4 py-3 bg-secondary/30 border-t border-border/30">
         <div>
-          {order.tip_amount > 0 && (
-            <p className="text-xs text-muted-foreground">
-              Subtotal €{(order.total_amount - order.tip_amount).toFixed(2)} + gorjeta €{order.tip_amount.toFixed(2)}
-            </p>
+          {order.tip_amount > 0 ? (
+            <>
+              <p className="text-xs text-muted-foreground">
+                €{subtotal?.toFixed(2)} + gorjeta €{order.tip_amount?.toFixed(2)}
+              </p>
+              <p className="font-bold text-primary text-base">€{order.total_amount?.toFixed(2)}</p>
+            </>
+          ) : (
+            <p className="font-bold text-primary text-base">€{order.total_amount?.toFixed(2)}</p>
           )}
-          <span className="font-semibold text-primary">€{order.total_amount?.toFixed(2)}</span>
         </div>
+
         {nextStatus[order.status] && (
           <button
             onClick={handleAdvance}
-            className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors"
+            className="flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl hover:bg-primary/90 active:scale-95 transition-all"
           >
-            → {statusLabel[nextStatus[order.status]]}
+            {nextLabel[order.status]}
+            <ChevronRight className="w-4 h-4" />
           </button>
         )}
       </div>
-
     </motion.div>
   );
 }

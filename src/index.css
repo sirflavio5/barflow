@@ -41,3 +41,19 @@
     @apply bg-background text-foreground font-inter;
   }
 }
+
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .pt-safe-top {
+    padding-top: env(safe-area-inset-top, 12px);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+}

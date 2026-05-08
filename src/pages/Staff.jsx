@@ -45,82 +45,90 @@ export default function Staff() {
   const doneOrders = orders.filter((o) => o.status === "pago");
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border px-5 pt-10 pb-4">
-        <div className="flex items-center gap-2 mb-1">
-          {settings.logo_url ? (
-            <img src={settings.logo_url} alt="Logo" className="w-5 h-5 object-contain rounded" />
-          ) : (
-            <Wine className="w-5 h-5 text-primary" />
-          )}
-          <span className="text-primary text-sm font-medium tracking-widest uppercase">{settings.bar_name || "Bar Nobre"}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="font-playfair font-bold text-2xl">Dashboard Staff</h1>
+    <div className="min-h-screen bg-background pb-safe">
+      {/* Header — mobile-first, sticky */}
+      <div className="sticky top-0 z-20 bg-card/95 backdrop-blur border-b border-border px-4 pt-safe-top">
+        <div className="flex items-center justify-between py-3">
+          {/* Left: brand */}
+          <div className="flex items-center gap-2 min-w-0">
+            {settings.logo_url ? (
+              <img src={settings.logo_url} alt="Logo" className="w-7 h-7 object-contain rounded flex-shrink-0" />
+            ) : (
+              <Wine className="w-5 h-5 text-primary flex-shrink-0" />
+            )}
+            <div className="min-w-0">
+              <p className="text-primary text-xs font-semibold tracking-widest uppercase truncate leading-none mb-0.5">
+                {settings.bar_name || "Bar Nobre"}
+              </p>
+              <h1 className="font-playfair font-bold text-lg leading-none">Staff</h1>
+            </div>
             {newOrderCount > 0 && (
-              <span
+              <button
                 onClick={() => setNewOrderCount(0)}
-                className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full cursor-pointer hover:bg-primary/80 transition-colors"
-                title="Clica para limpar"
+                className="ml-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full"
               >
-                {newOrderCount} novo{newOrderCount > 1 ? "s" : ""}
-              </span>
+                {newOrderCount}
+              </button>
             )}
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Right: controls */}
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setSoundEnabled((v) => !v)}
               title={soundEnabled ? "Desativar som" : "Ativar som"}
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
                 soundEnabled
-                  ? "bg-primary/20 text-primary hover:bg-primary/30"
-                  : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                  ? "bg-primary/20 text-primary"
+                  : "bg-secondary text-muted-foreground"
               }`}
             >
               {soundEnabled ? <BellRing className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
             </button>
-            <div className="flex items-center gap-1.5 text-xs text-green-400 font-medium">
-              <span className="relative flex h-2 w-2">
+            <div className="flex items-center gap-1.5 bg-green-500/10 text-green-400 text-xs font-medium px-2.5 py-1.5 rounded-full">
+              <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-400"></span>
               </span>
-              Em direto
+              Live
             </div>
           </div>
         </div>
       </div>
 
-      <div className="p-5 space-y-4">
+      <div className="px-4 py-4 space-y-3 max-w-2xl mx-auto">
         <AnimatePresence>
           {newOrderAlert && (
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.97 }}
+              initial={{ opacity: 0, y: -8, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.97 }}
-              className="bg-primary/20 border border-primary/50 text-primary rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2 shadow-lg shadow-primary/10"
+              className="bg-primary/20 border border-primary/50 text-primary rounded-2xl px-4 py-3 text-sm font-semibold flex items-center gap-2 shadow-lg shadow-primary/10"
             >
-              <BellRing className="w-4 h-4 animate-bounce" />
+              <BellRing className="w-4 h-4 animate-bounce flex-shrink-0" />
               Novo pedido recebido!
             </motion.div>
           )}
         </AnimatePresence>
 
-        <h2 className="font-semibold text-lg">
-          Pedidos ativos <span className="text-primary">({activeOrders.length})</span>
-        </h2>
+        {/* Section header */}
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-base">
+            Pedidos ativos{" "}
+            <span className="text-primary font-bold">({activeOrders.length})</span>
+          </h2>
+        </div>
 
         {loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-36 bg-card rounded-2xl animate-pulse border border-border/30" />
+              <div key={i} className="h-32 bg-card rounded-2xl animate-pulse border border-border/30" />
             ))}
           </div>
         ) : activeOrders.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">
-            <ClipboardList className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p>Sem pedidos ativos</p>
+          <div className="text-center py-20 text-muted-foreground">
+            <ClipboardList className="w-14 h-14 mx-auto mb-3 opacity-20" />
+            <p className="text-sm">Sem pedidos ativos</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -131,9 +139,11 @@ export default function Staff() {
         )}
 
         {doneOrders.length > 0 && (
-          <div className="mt-6">
-            <h2 className="font-semibold text-base text-muted-foreground mb-3">Concluídos hoje ({doneOrders.length})</h2>
-            <div className="space-y-3 opacity-60">
+          <div className="pt-2">
+            <h2 className="font-semibold text-sm text-muted-foreground mb-3">
+              Concluídos ({doneOrders.length})
+            </h2>
+            <div className="space-y-3 opacity-50">
               {doneOrders.slice(0, 5).map((o) => (
                 <OrderCard key={o.id} order={o} onUpdate={loadOrders} />
               ))}

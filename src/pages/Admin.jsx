@@ -84,25 +84,27 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-card border-b border-border px-5 pt-10 pb-4">
-        <div className="flex items-center gap-2 mb-1">
-          {settings.logo_url ? (
-            <img src={settings.logo_url} alt="Logo" className="w-5 h-5 object-contain rounded" />
-          ) : (
-            <Wine className="w-5 h-5 text-primary" />
-          )}
-          <span className="text-primary text-sm font-medium tracking-widest uppercase">{settings.bar_name || "Bar Nobre"}</span>
+      <div className="bg-card border-b border-border px-4 pt-safe-top pb-3 flex items-center gap-2">
+        {settings.logo_url ? (
+          <img src={settings.logo_url} alt="Logo" className="w-7 h-7 object-contain rounded flex-shrink-0" />
+        ) : (
+          <Wine className="w-5 h-5 text-primary flex-shrink-0" />
+        )}
+        <div>
+          <p className="text-primary text-xs font-semibold tracking-widest uppercase leading-none mb-0.5">
+            {settings.bar_name || "Bar Nobre"}
+          </p>
+          <h1 className="font-playfair font-bold text-lg leading-none">Gestão</h1>
         </div>
-        <h1 className="font-playfair font-bold text-2xl">Painel de Gestão</h1>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-border bg-card">
+      {/* Tabs — horizontal scroll on mobile */}
+      <div className="flex border-b border-border bg-card overflow-x-auto scrollbar-none">
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors relative ${
+            className={`flex-shrink-0 flex flex-col items-center gap-1 px-4 py-3 text-xs font-medium transition-colors relative ${
               tab === t.id ? "text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -115,7 +117,7 @@ export default function Admin() {
         ))}
       </div>
 
-      <div className="p-5">
+      <div className="p-4 max-w-2xl mx-auto">
         {/* ORDERS TAB */}
         {tab === "orders" && (
           <div className="space-y-4">

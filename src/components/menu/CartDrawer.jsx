@@ -1,10 +1,11 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Trash2, ShoppingBag } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Trash2, ShoppingBag, Send } from "lucide-react";
 import { useState } from "react";
-import PaymentModal from "./PaymentModal";
+import { base44 } from "@/api/base44Client";
 
 export default function CartDrawer({ cart, products, onClose, onRemove, onAdd, tableNumber, onOrderPlaced }) {
-  const [showPayment, setShowPayment] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const items = Object.entries(cart)
     .filter(([, qty]) => qty > 0)
@@ -16,13 +17,33 @@ export default function CartDrawer({ cart, products, onClose, onRemove, onAdd, t
 
   const total = items.reduce((s, i) => s + i.total, 0);
 
+  const handleSendOrder = async () => {
+    setLoading(true);
+    await base44.entities.Order.create({
+      table_number: tableNumber,
+      items: items.map((i) => ({
+        product_id: i.id,
+        product_name: i.name,
+        quantity: i.quantity,
+        unit_price: i.price,
+        total: i.total,
+      })),
+      total_amount: total,
+      tip_amount: 0,
+      status: "pendente",
+      notes: notes || undefined,
+    });
+    setLoading(false);
+    onOrderPlaced();
+  };
+
   return (
     <>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
         onClick={onClose}
       />
       <motion.div
@@ -30,7 +51,7 @@ export default function CartDrawer({ cart, products, onClose, onRemove, onAdd, t
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 28, stiffness: 300 }}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-3xl max-h-[80vh] flex flex-col border-t border-border"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-3xl max-h-[85vh] flex flex-col border-t border-border"
       >
         <div className="flex items-center justify-between p-5 border-b border-border/50">
           <div className="flex items-center gap-2">
@@ -58,6 +79,16 @@ export default function CartDrawer({ cart, products, onClose, onRemove, onAdd, t
               </button>
             </div>
           ))}
+
+          <div className="pt-2">
+            <label className="text-xs text-muted-foreground mb-1.5 block">Observações (opcional)</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Ex: sem gelo, alergia a frutos secos..."
+              className="w-full bg-secondary border border-border rounded-xl p-3 text-sm text-foreground placeholder:text-muted-foreground resize-none h-20 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
         </div>
 
         <div className="p-5 border-t border-border/50 space-y-4">
@@ -66,25 +97,15 @@ export default function CartDrawer({ cart, products, onClose, onRemove, onAdd, t
             <span className="font-playfair font-bold text-2xl text-primary">€{total.toFixed(2)}</span>
           </div>
           <button
-            onClick={() => setShowPayment(true)}
-            className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-semibold text-base hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+            onClick={handleSendOrder}
+            disabled={loading}
+            className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-semibold text-base hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            Pagar agora
+            <Send className="w-4 h-4" />
+            {loading ? "A enviar..." : "Enviar pedido"}
           </button>
         </div>
       </motion.div>
-
-      <AnimatePresence>
-        {showPayment && (
-          <PaymentModal
-            items={items}
-            total={total}
-            tableNumber={tableNumber}
-            onClose={() => setShowPayment(false)}
-            onOrderPlaced={onOrderPlaced}
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 }

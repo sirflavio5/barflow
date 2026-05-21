@@ -58,7 +58,7 @@ export default function Menu() {
         </motion.div>
         <h1 className="font-playfair font-bold text-3xl text-foreground">Obrigado!</h1>
         <p className="text-muted-foreground text-base max-w-xs">
-          O teu pedido foi enviado para a cozinha/bar. Em breve será preparado!
+          O teu pedido foi enviado. O staff irá trazer à mesa em breve!
         </p>
         <button
           onClick={() => { setCart({}); setOrderPlaced(false); }}

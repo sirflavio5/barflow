@@ -4,16 +4,16 @@ import { useBarSettings } from "@/lib/BarSettingsContext";
 import { base44 } from "@/api/base44Client";
 
 const PRESET_COLORS = [
-  { label: "Dourado", value: "#F59E0B" },
-  { label: "Âmbar", value: "#D97706" },
-  { label: "Vermelho", value: "#EF4444" },
+  { label: "B'Live", value: "#E91E8C" },
   { label: "Rosa", value: "#EC4899" },
   { label: "Roxo", value: "#8B5CF6" },
   { label: "Azul", value: "#3B82F6" },
   { label: "Ciano", value: "#06B6D4" },
   { label: "Verde", value: "#10B981" },
-  { label: "Lima", value: "#84CC16" },
+  { label: "Dourado", value: "#F59E0B" },
   { label: "Laranja", value: "#F97316" },
+  { label: "Vermelho", value: "#EF4444" },
+  { label: "Branco", value: "#F8F8F8" },
 ];
 
 export default function SettingsPanel() {
@@ -27,7 +27,7 @@ export default function SettingsPanel() {
 
   const [form, setForm] = useState({
     bar_name: settings.bar_name || "Bar Nobre",
-    primary_color: settings.primary_color || "#F59E0B",
+    primary_color: settings.primary_color || "#E91E8C",
     logo_url: settings.logo_url || "",
     tagline: settings.tagline || "",
     payment_methods: settings.payment_methods || ["mbway", "multibanco", "cartao", "numerario"],

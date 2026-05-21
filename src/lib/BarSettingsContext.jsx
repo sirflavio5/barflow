@@ -5,8 +5,8 @@ const BarSettingsContext = createContext(null);
 
 export function BarSettingsProvider({ children }) {
   const [settings, setSettings] = useState({
-    bar_name: "Bar Nobre",
-    primary_color: "#F59E0B",
+    bar_name: "B'Live Lounge Bar",
+    primary_color: "#E91E8C",
     logo_url: null,
     tagline: null,
   });

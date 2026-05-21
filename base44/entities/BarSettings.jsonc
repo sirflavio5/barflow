@@ -4,29 +4,17 @@
   "properties": {
     "bar_name": {
       "type": "string",
-      "default": "Bar Nobre"
+      "default": "B'Live Lounge Bar"
     },
     "primary_color": {
       "type": "string",
-      "default": "#F59E0B"
+      "default": "#E91E8C"
     },
     "logo_url": {
       "type": "string"
     },
     "tagline": {
       "type": "string"
-    },
-    "payment_methods": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": [
-        "mbway",
-        "multibanco",
-        "cartao",
-        "numerario"
-      ]
     }
   },
   "required": []

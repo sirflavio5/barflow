@@ -6,6 +6,7 @@ const categories = [
   { id: "cocktails", label: "Cocktails", emoji: "🍹" },
   { id: "comida", label: "Comida", emoji: "🍔" },
   { id: "sobremesas", label: "Sobremesas", emoji: "🍮" },
+  { id: "shisha", label: "Shisha", emoji: "💨" },
 ];
 
 export default function CategoryTabs({ active, onChange }) {

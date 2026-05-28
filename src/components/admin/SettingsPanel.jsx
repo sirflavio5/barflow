@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, Palette, Type, Image, Save, CheckCircle2, CreditCard, Smartphone, Hash, Banknote } from "lucide-react";
+import { Upload, Palette, Type, Image, Save, CheckCircle2 } from "lucide-react";
 import { useBarSettings } from "@/lib/BarSettingsContext";
 import { base44 } from "@/api/base44Client";
 
@@ -18,31 +18,12 @@ const PRESET_COLORS = [
 
 export default function SettingsPanel() {
   const { settings, updateSettings } = useBarSettings();
-  const ALL_METHODS = [
-    { id: "mbway", label: "MB WAY", icon: Smartphone },
-    { id: "multibanco", label: "Multibanco", icon: Hash },
-    { id: "cartao", label: "Cartão", icon: CreditCard },
-    { id: "numerario", label: "Numerário", icon: Banknote },
-  ];
-
   const [form, setForm] = useState({
     bar_name: settings.bar_name || "Bar Nobre",
     primary_color: settings.primary_color || "#E91E8C",
     logo_url: settings.logo_url || "",
     tagline: settings.tagline || "",
-    payment_methods: settings.payment_methods || ["mbway", "multibanco", "cartao", "numerario"],
   });
-
-  const toggleMethod = (id) => {
-    setForm((f) => {
-      const active = f.payment_methods || [];
-      if (active.includes(id)) {
-        if (active.length === 1) return f; // must keep at least one
-        return { ...f, payment_methods: active.filter((m) => m !== id) };
-      }
-      return { ...f, payment_methods: [...active, id] };
-    });
-  };
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -182,36 +163,7 @@ export default function SettingsPanel() {
         </div>
       </div>
 
-      {/* Payment Methods */}
-      <div className="bg-card border border-border/50 rounded-2xl p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <CreditCard className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-base">Formas de pagamento</h3>
-        </div>
-        <p className="text-xs text-muted-foreground -mt-2">Escolhe quais os métodos disponíveis para os clientes no checkout.</p>
-        <div className="grid grid-cols-2 gap-3">
-          {ALL_METHODS.map((m) => {
-            const active = (form.payment_methods || []).includes(m.id);
-            return (
-              <button
-                key={m.id}
-                onClick={() => toggleMethod(m.id)}
-                className={`flex items-center gap-3 p-3 rounded-2xl border-2 transition-all text-left ${
-                  active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-secondary/50 text-muted-foreground"
-                }`}
-              >
-                <m.icon className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm font-medium">{m.label}</span>
-                <div className={`ml-auto w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${active ? "border-primary bg-primary" : "border-muted-foreground"}`}>
-                  {active && <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+
 
       {/* Preview */}
       <div className="bg-card border border-border/50 rounded-2xl p-5 space-y-3">

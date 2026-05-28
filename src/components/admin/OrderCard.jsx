@@ -7,7 +7,6 @@ const statusColors = {
   confirmado: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   em_preparacao: "bg-orange-500/20 text-orange-400 border-orange-500/30",
   pronto: "bg-green-500/20 text-green-400 border-green-500/30",
-  pago: "bg-muted text-muted-foreground border-border",
 };
 
 const statusLabel = {
@@ -15,21 +14,18 @@ const statusLabel = {
   confirmado: "Confirmado",
   em_preparacao: "Em prep.",
   pronto: "Pronto",
-  pago: "Pago",
 };
 
 const nextStatus = {
   pendente: "confirmado",
   confirmado: "em_preparacao",
   em_preparacao: "pronto",
-  pronto: "pago",
 };
 
 const nextLabel = {
   pendente: "Confirmar",
   confirmado: "Preparar",
   em_preparacao: "Pronto",
-  pronto: "Pago",
 };
 
 export default function OrderCard({ order, onUpdate }) {
@@ -54,8 +50,6 @@ export default function OrderCard({ order, onUpdate }) {
     onUpdate();
   };
 
-  const subtotal = order.tip_amount > 0 ? order.total_amount - order.tip_amount : order.total_amount;
-
   return (
     <motion.div
       layout
@@ -63,7 +57,6 @@ export default function OrderCard({ order, onUpdate }) {
       animate={{ opacity: 1, y: 0 }}
       className="bg-card border border-border/50 rounded-2xl overflow-hidden"
     >
-      {/* Card header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/40">
         <div className="flex items-center gap-2">
           <p className="font-playfair font-bold text-base">Mesa {order.table_number}</p>
@@ -76,7 +69,6 @@ export default function OrderCard({ order, onUpdate }) {
         </p>
       </div>
 
-      {/* Items */}
       <div className="px-4 py-3 space-y-1.5">
         {order.items?.map((item, i) => (
           <div key={i} className="flex justify-between text-sm">
@@ -89,7 +81,6 @@ export default function OrderCard({ order, onUpdate }) {
         ))}
       </div>
 
-      {/* Notes */}
       {order.notes && (
         <div className="mx-4 mb-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-3 py-2 flex items-start gap-2">
           <MessageSquare className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0 mt-0.5" />
@@ -97,22 +88,9 @@ export default function OrderCard({ order, onUpdate }) {
         </div>
       )}
 
-      {/* Footer: total + action */}
       <div className="flex items-center justify-between px-4 py-3 bg-secondary/30 border-t border-border/30">
-        <div>
-          {order.tip_amount > 0 ? (
-            <>
-              <p className="text-xs text-muted-foreground">
-                €{subtotal?.toFixed(2)} + gorjeta €{order.tip_amount?.toFixed(2)}
-              </p>
-              <p className="font-bold text-primary text-base">€{order.total_amount?.toFixed(2)}</p>
-            </>
-          ) : (
-            <p className="font-bold text-primary text-base">€{order.total_amount?.toFixed(2)}</p>
-          )}
-        </div>
-
-        {nextStatus[order.status] && (
+        <p className="font-bold text-primary text-base">€{order.total_amount?.toFixed(2)}</p>
+        {nextStatus[order.status] ? (
           <button
             onClick={handleAdvance}
             className="flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl hover:bg-primary/90 active:scale-95 transition-all"
@@ -120,6 +98,8 @@ export default function OrderCard({ order, onUpdate }) {
             {nextLabel[order.status]}
             <ChevronRight className="w-4 h-4" />
           </button>
+        ) : (
+          <span className="text-green-400 text-sm font-semibold">✓ Pronto</span>
         )}
       </div>
     </motion.div>

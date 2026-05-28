@@ -31,29 +31,15 @@
     "total_amount": {
       "type": "number"
     },
-    "tip_amount": {
-      "type": "number",
-      "default": 0
-    },
     "status": {
       "type": "string",
       "enum": [
         "pendente",
         "confirmado",
         "em_preparacao",
-        "pronto",
-        "pago"
+        "pronto"
       ],
       "default": "pendente"
-    },
-    "payment_method": {
-      "type": "string",
-      "enum": [
-        "mbway",
-        "multibanco",
-        "cartao",
-        "numerario"
-      ]
     },
     "notes": {
       "type": "string"

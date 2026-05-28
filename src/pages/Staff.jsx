@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { ClipboardList, Wine, BellRing, BellOff } from "lucide-react";
-import OrderCard from "@/components/admin/OrderCard";
+import TableGroup from "@/components/admin/TableGroup";
 import { useBarSettings } from "@/lib/BarSettingsContext";
 import { useOrderNotification } from "@/hooks/useOrderNotification";
 
@@ -12,8 +12,12 @@ export default function Staff() {
   const [newOrderAlert, setNewOrderAlert] = useState(false);
   const [newOrderCount, setNewOrderCount] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const soundEnabledRef = useRef(true);
   const { settings } = useBarSettings();
   const { playSound } = useOrderNotification();
+
+  // Keep ref in sync so the subscription closure always reads current value
+  useEffect(() => { soundEnabledRef.current = soundEnabled; }, [soundEnabled]);
 
   const loadOrders = useCallback(async () => {
     const data = await base44.entities.Order.list("-created_date", 500);
@@ -29,8 +33,8 @@ export default function Staff() {
         setOrders((prev) => [event.data, ...prev]);
         setNewOrderAlert(true);
         setNewOrderCount((c) => c + 1);
-        if (soundEnabled) playSound();
-        setTimeout(() => setNewOrderAlert(false), 5000);
+        if (soundEnabledRef.current) playSound();
+        setTimeout(() => setNewOrderAlert(false), 6000);
       } else if (event.type === "update") {
         setOrders((prev) => prev.map((o) => o.id === event.id ? event.data : o));
       } else if (event.type === "delete") {
@@ -41,15 +45,27 @@ export default function Staff() {
     return () => unsubscribe();
   }, [loadOrders]);
 
-  const activeOrders = orders.filter((o) => o.status !== "pago");
-  const doneOrders = orders.filter((o) => o.status === "pago");
+  // Group active orders by table
+  const activeOrders = orders.filter((o) => o.status !== "pronto_limpo");
+  
+  const tableGroups = activeOrders.reduce((acc, order) => {
+    const key = order.table_number;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(order);
+    return acc;
+  }, {});
+
+  const sortedTables = Object.keys(tableGroups).sort((a, b) => {
+    const numA = parseInt(a) || 0;
+    const numB = parseInt(b) || 0;
+    return numA - numB;
+  });
 
   return (
     <div className="min-h-screen bg-background pb-safe">
-      {/* Header — mobile-first, sticky */}
+      {/* Header */}
       <div className="sticky top-0 z-20 bg-card/95 backdrop-blur border-b border-border px-4 pt-safe-top">
         <div className="flex items-center justify-between py-3">
-          {/* Left: brand */}
           <div className="flex items-center gap-2 min-w-0">
             {settings.logo_url ? (
               <img src={settings.logo_url} alt="Logo" className="w-7 h-7 object-contain rounded flex-shrink-0" />
@@ -65,22 +81,19 @@ export default function Staff() {
             {newOrderCount > 0 && (
               <button
                 onClick={() => setNewOrderCount(0)}
-                className="ml-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full"
+                className="ml-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full animate-pulse"
               >
-                {newOrderCount}
+                {newOrderCount} novo{newOrderCount !== 1 ? "s" : ""}
               </button>
             )}
           </div>
 
-          {/* Right: controls */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSoundEnabled((v) => !v)}
               title={soundEnabled ? "Desativar som" : "Ativar som"}
               className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
-                soundEnabled
-                  ? "bg-primary/20 text-primary"
-                  : "bg-secondary text-muted-foreground"
+                soundEnabled ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"
               }`}
             >
               {soundEnabled ? <BellRing className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
@@ -97,6 +110,7 @@ export default function Staff() {
       </div>
 
       <div className="px-4 py-4 space-y-3 max-w-2xl mx-auto">
+        {/* New order alert banner */}
         <AnimatePresence>
           {newOrderAlert && (
             <motion.div
@@ -106,7 +120,7 @@ export default function Staff() {
               className="bg-primary/20 border border-primary/50 text-primary rounded-2xl px-4 py-3 text-sm font-semibold flex items-center gap-2 shadow-lg shadow-primary/10"
             >
               <BellRing className="w-4 h-4 animate-bounce flex-shrink-0" />
-              Novo pedido recebido!
+              🔔 Novo pedido recebido!
             </motion.div>
           )}
         </AnimatePresence>
@@ -114,8 +128,8 @@ export default function Staff() {
         {/* Section header */}
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-base">
-            Pedidos ativos{" "}
-            <span className="text-primary font-bold">({activeOrders.length})</span>
+            Mesas ativas{" "}
+            <span className="text-primary font-bold">({sortedTables.length})</span>
           </h2>
         </div>
 
@@ -125,29 +139,22 @@ export default function Staff() {
               <div key={i} className="h-32 bg-card rounded-2xl animate-pulse border border-border/30" />
             ))}
           </div>
-        ) : activeOrders.length === 0 ? (
+        ) : sortedTables.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground">
             <ClipboardList className="w-14 h-14 mx-auto mb-3 opacity-20" />
             <p className="text-sm">Sem pedidos ativos</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {activeOrders.map((o) => (
-              <OrderCard key={o.id} order={o} onUpdate={loadOrders} />
+            {sortedTables.map((table) => (
+              <TableGroup
+                key={table}
+                tableNumber={table}
+                orders={tableGroups[table]}
+                onUpdate={loadOrders}
+                onClearTable={loadOrders}
+              />
             ))}
-          </div>
-        )}
-
-        {doneOrders.length > 0 && (
-          <div className="pt-2">
-            <h2 className="font-semibold text-sm text-muted-foreground mb-3">
-              Concluídos ({doneOrders.length})
-            </h2>
-            <div className="space-y-3 opacity-50">
-              {doneOrders.slice(0, 5).map((o) => (
-                <OrderCard key={o.id} order={o} onUpdate={loadOrders} />
-              ))}
-            </div>
           </div>
         )}
       </div>
